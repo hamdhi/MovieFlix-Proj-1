@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
 
 @RestController
@@ -29,6 +30,36 @@ public class ShowController {
     public ResponseEntity<Show> addShow(@RequestBody ShowRequest showRequest) {
         Show show = showService.addShow(showRequest);
         return new ResponseEntity<>(show, HttpStatus.CREATED);
+    }
+
+    @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Show> getShowById(@PathVariable Long id) {
+        Show show = showService.getShowById(id);
+        return ResponseEntity.ok(show);
+    }
+
+    @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<Show>> getAllShows() {
+        List<Show> shows = showService.getAllShows();
+        return ResponseEntity.ok(shows);
+    }
+
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Show> updateShow(@PathVariable Long id, @RequestBody ShowRequest showRequest) {
+        Show updatedShow = showService.updateShow(id, showRequest);
+        return ResponseEntity.ok(updatedShow);
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> deleteShow(@PathVariable Long id) {
+        showService.deleteShow(id);
+        return ResponseEntity.ok().body(new HashMap<String, String>() {{
+            put("message", "Show deleted successfully");
+        }});
     }
 
     // Anyone (including Users) can view shows for a specific movie

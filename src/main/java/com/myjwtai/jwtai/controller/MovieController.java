@@ -33,6 +33,29 @@ public class MovieController {
         return new ResponseEntity<>(savedMovie, HttpStatus.CREATED);
     }
 
+    @GetMapping("/{id}")
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+    public ResponseEntity<Movie> getMovieById(@PathVariable Long id) {
+        Movie movie = movieService.getMovieById(id);
+        return ResponseEntity.ok(movie);
+    }
+
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Movie> updateMovie(@PathVariable Long id, @RequestBody Movie movieDetails) {
+        Movie updatedMovie = movieService.updateMovie(id, movieDetails);
+        return ResponseEntity.ok(updatedMovie);
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> deleteMovie(@PathVariable Long id) {
+        movieService.deleteMovie(id);
+        return ResponseEntity.ok().body(new HashMap<String, String>() {{
+            put("message", "Movie deleted successfully");
+        }});
+    }
+
     @GetMapping
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     public ResponseEntity<Map<String, Object>> searchMovies(
