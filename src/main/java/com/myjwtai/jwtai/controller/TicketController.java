@@ -45,4 +45,19 @@ public class TicketController {
         List<Ticket> tickets = ticketService.getUserTickets(username);
         return ResponseEntity.ok(tickets);
     }
+
+    // Users can cancel their own tickets
+    @PostMapping("/{ticketId}/cancel")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<?> cancelTicket(@PathVariable Long ticketId) {
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String username = authentication.getName();
+            
+            Ticket cancelledTicket = ticketService.cancelTicket(ticketId, username);
+            return ResponseEntity.ok(cancelledTicket);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 }

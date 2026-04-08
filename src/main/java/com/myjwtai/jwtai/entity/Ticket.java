@@ -1,6 +1,7 @@
 package com.myjwtai.jwtai.entity;
 
 import jakarta.persistence.*;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -21,6 +22,18 @@ public class Ticket {
 
     @Column(nullable = false)
     private LocalDateTime bookingTime;
+
+    @Column(nullable = false, precision = 10, scale = 2)
+    private BigDecimal totalAmount;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private TicketStatus status;
+
+    public enum TicketStatus {
+        CONFIRMED,
+        CANCELLED
+    }
 
     public Ticket() {}
 
@@ -54,5 +67,21 @@ public class Ticket {
 
     public void setBookingTime(LocalDateTime bookingTime) {
         this.bookingTime = bookingTime;
+    }
+
+    public BigDecimal getTotalAmount() {
+        return totalAmount;
+    }
+
+    public void setTotalAmount(BigDecimal totalAmount) {
+        this.totalAmount = totalAmount;
+    }
+
+    public TicketStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(TicketStatus status) {
+        this.status = status;
     }
 }

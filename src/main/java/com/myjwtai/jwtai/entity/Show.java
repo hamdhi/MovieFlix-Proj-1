@@ -1,6 +1,7 @@
 package com.myjwtai.jwtai.entity;
 
 import jakarta.persistence.*;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -21,6 +22,9 @@ public class Show {
 
     @Column(nullable = false)
     private LocalDateTime showTime;
+
+    @Column(nullable = false, precision = 10, scale = 2)
+    private BigDecimal price; // Price per seat for this show
 
     public Show() {}
 
@@ -54,5 +58,13 @@ public class Show {
 
     public void setShowTime(LocalDateTime showTime) {
         this.showTime = showTime;
+    }
+
+    public BigDecimal getPrice() {
+        return price;
+    }
+
+    public void setPrice(BigDecimal price) {
+        this.price = price;
     }
 }

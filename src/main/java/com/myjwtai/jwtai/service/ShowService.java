@@ -47,6 +47,7 @@ public class ShowService {
         show.setMovie(movie);
         show.setScreen(screen);
         show.setShowTime(showRequest.getShowTime());
+        show.setPrice(showRequest.getPrice()); // Set price
 
         Show savedShow = showRepository.save(show);
         
