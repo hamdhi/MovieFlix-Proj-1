@@ -1,18 +1,18 @@
 package com.myjwtai.jwtai.repository;
 
 import com.myjwtai.jwtai.entity.Movie;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-
 @Repository
 public interface MovieRepository extends JpaRepository<Movie, Long> {
-    List<Movie> findByTitleContainingIgnoreCase(String title);
-    List<Movie> findByGenreContainingIgnoreCase(String genre);
-    List<Movie> findByLanguageContainingIgnoreCase(String language);
-    List<Movie> findByTitleContainingIgnoreCaseAndGenreContainingIgnoreCase(String title, String genre);
-    List<Movie> findByTitleContainingIgnoreCaseAndLanguageContainingIgnoreCase(String title, String language);
-    List<Movie> findByGenreContainingIgnoreCaseAndLanguageContainingIgnoreCase(String genre, String language);
-    List<Movie> findByTitleContainingIgnoreCaseAndGenreContainingIgnoreCaseAndLanguageContainingIgnoreCase(String title, String genre, String language);
+    Page<Movie> findByTitleContainingIgnoreCase(String title, Pageable pageable);
+    Page<Movie> findByGenreContainingIgnoreCase(String genre, Pageable pageable);
+    Page<Movie> findByLanguageContainingIgnoreCase(String language, Pageable pageable);
+    Page<Movie> findByTitleContainingIgnoreCaseAndGenreContainingIgnoreCase(String title, String genre, Pageable pageable);
+    Page<Movie> findByTitleContainingIgnoreCaseAndLanguageContainingIgnoreCase(String title, String language, Pageable pageable);
+    Page<Movie> findByGenreContainingIgnoreCaseAndLanguageContainingIgnoreCase(String genre, String language, Pageable pageable);
+    Page<Movie> findByTitleContainingIgnoreCaseAndGenreContainingIgnoreCaseAndLanguageContainingIgnoreCase(String title, String genre, String language, Pageable pageable);
 }
