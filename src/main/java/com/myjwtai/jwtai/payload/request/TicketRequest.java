@@ -1,8 +1,10 @@
 package com.myjwtai.jwtai.payload.request;
 
+import java.util.List;
+
 public class TicketRequest {
     private Long showId;
-    private Integer numberOfSeats;
+    private List<Long> showSeatIds;
 
     public Long getShowId() {
         return showId;
@@ -12,11 +14,11 @@ public class TicketRequest {
         this.showId = showId;
     }
 
-    public Integer getNumberOfSeats() {
-        return numberOfSeats;
+    public List<Long> getShowSeatIds() {
+        return showSeatIds;
     }
 
-    public void setNumberOfSeats(Integer numberOfSeats) {
-        this.numberOfSeats = numberOfSeats;
+    public void setShowSeatIds(List<Long> showSeatIds) {
+        this.showSeatIds = showSeatIds;
     }
 }

@@ -20,9 +20,6 @@ public class Ticket {
     private Show show;
 
     @Column(nullable = false)
-    private Integer numberOfSeats;
-
-    @Column(nullable = false)
     private LocalDateTime bookingTime;
 
     public Ticket() {}
@@ -49,14 +46,6 @@ public class Ticket {
 
     public void setShow(Show show) {
         this.show = show;
-    }
-
-    public Integer getNumberOfSeats() {
-        return numberOfSeats;
-    }
-
-    public void setNumberOfSeats(Integer numberOfSeats) {
-        this.numberOfSeats = numberOfSeats;
     }
 
     public LocalDateTime getBookingTime() {

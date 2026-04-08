@@ -1,7 +1,9 @@
 package com.myjwtai.jwtai.controller;
 
 import com.myjwtai.jwtai.entity.Show;
+import com.myjwtai.jwtai.entity.ShowSeat;
 import com.myjwtai.jwtai.payload.request.ShowRequest;
+import com.myjwtai.jwtai.repository.ShowSeatRepository;
 import com.myjwtai.jwtai.service.ShowService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,6 +19,9 @@ public class ShowController {
 
     @Autowired
     private ShowService showService;
+    
+    @Autowired
+    private ShowSeatRepository showSeatRepository;
 
     // Only Admins can add shows for a movie
     @PostMapping("/add")
@@ -32,5 +37,13 @@ public class ShowController {
     public ResponseEntity<List<Show>> getShowsForMovie(@PathVariable Long movieId) {
         List<Show> shows = showService.getShowsByMovie(movieId);
         return ResponseEntity.ok(shows);
+    }
+    
+    // Endpoint to view the seat map for a specific show
+    @GetMapping("/{showId}/seats")
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+    public ResponseEntity<List<ShowSeat>> getSeatMapForShow(@PathVariable Long showId) {
+        List<ShowSeat> seats = showSeatRepository.findByShowId(showId);
+        return ResponseEntity.ok(seats);
     }
 }

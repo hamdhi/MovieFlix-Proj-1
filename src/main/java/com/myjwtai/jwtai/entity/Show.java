@@ -15,11 +15,12 @@ public class Show {
     @JoinColumn(name = "movie_id", nullable = false)
     private Movie movie;
 
-    @Column(nullable = false)
-    private LocalDateTime showTime;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "screen_id", nullable = false)
+    private Screen screen;
 
     @Column(nullable = false)
-    private Integer availableSeats;
+    private LocalDateTime showTime;
 
     public Show() {}
 
@@ -39,19 +40,19 @@ public class Show {
         this.movie = movie;
     }
 
+    public Screen getScreen() {
+        return screen;
+    }
+
+    public void setScreen(Screen screen) {
+        this.screen = screen;
+    }
+
     public LocalDateTime getShowTime() {
         return showTime;
     }
 
     public void setShowTime(LocalDateTime showTime) {
         this.showTime = showTime;
-    }
-
-    public Integer getAvailableSeats() {
-        return availableSeats;
-    }
-
-    public void setAvailableSeats(Integer availableSeats) {
-        this.availableSeats = availableSeats;
     }
 }
