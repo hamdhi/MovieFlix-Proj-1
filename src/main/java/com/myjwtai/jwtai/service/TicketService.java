@@ -4,7 +4,9 @@ import com.myjwtai.jwtai.entity.Show;
 import com.myjwtai.jwtai.entity.ShowSeat;
 import com.myjwtai.jwtai.entity.Ticket;
 import com.myjwtai.jwtai.entity.User;
+import com.myjwtai.jwtai.payload.request.LockSeatsRequest;
 import com.myjwtai.jwtai.payload.request.TicketRequest;
+import com.myjwtai.jwtai.payload.request.UnlockSeatsRequest;
 import com.myjwtai.jwtai.repository.ShowRepository;
 import com.myjwtai.jwtai.repository.ShowSeatRepository;
 import com.myjwtai.jwtai.repository.TicketRepository;
@@ -33,6 +35,74 @@ public class TicketService {
     private ShowSeatRepository showSeatRepository;
 
     @Transactional
+    public List<ShowSeat> lockSeats(String username, LockSeatsRequest lockRequest) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Error: User not found."));
+
+        Show show = showRepository.findById(lockRequest.getShowId())
+                .orElseThrow(() -> new RuntimeException("Error: Show not found."));
+
+        List<ShowSeat> selectedSeats = showSeatRepository.findAllById(lockRequest.getShowSeatIds());
+
+        if (selectedSeats.size() != lockRequest.getShowSeatIds().size()) {
+            throw new RuntimeException("Error: One or more selected seats do not exist.");
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+
+        // Validate that all seats are available or already locked by the current user with an active lock
+        for (ShowSeat seat : selectedSeats) {
+            if (!seat.getShow().getId().equals(show.getId())) {
+                throw new RuntimeException("Error: Seat " + seat.getSeat().getSeatNumber() + " does not belong to this show.");
+            }
+
+            if (seat.getStatus().equals(ShowSeat.SeatStatus.BOOKED)) {
+                throw new RuntimeException("Error: Seat " + seat.getSeat().getSeatNumber() + " is already booked.");
+            }
+
+            if (seat.getStatus().equals(ShowSeat.SeatStatus.LOCKED)) {
+                // If it's locked, check if the lock belongs to someone else and hasn't expired
+                if (seat.getLockedBy() != null && !seat.getLockedBy().getId().equals(user.getId()) && seat.getLockedUntil().isAfter(now)) {
+                    throw new RuntimeException("Error: Seat " + seat.getSeat().getSeatNumber() + " is currently locked by another user.");
+                }
+            }
+        }
+
+        // Lock the seats for 5 minutes
+        LocalDateTime lockExpiry = now.plusMinutes(5);
+        for (ShowSeat seat : selectedSeats) {
+            seat.setStatus(ShowSeat.SeatStatus.LOCKED);
+            seat.setLockedBy(user);
+            seat.setLockedUntil(lockExpiry);
+            showSeatRepository.save(seat);
+        }
+
+        return selectedSeats;
+    }
+
+    @Transactional
+    public List<ShowSeat> unlockSeats(String username, UnlockSeatsRequest unlockRequest) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Error: User not found."));
+
+        List<ShowSeat> selectedSeats = showSeatRepository.findAllById(unlockRequest.getShowSeatIds());
+
+        for (ShowSeat seat : selectedSeats) {
+            // Only unlock if the seat is locked by this user
+            if (seat.getStatus().equals(ShowSeat.SeatStatus.LOCKED) &&
+                seat.getLockedBy() != null &&
+                seat.getLockedBy().getId().equals(user.getId())) {
+                
+                seat.setStatus(ShowSeat.SeatStatus.AVAILABLE);
+                seat.setLockedBy(null);
+                seat.setLockedUntil(null);
+                showSeatRepository.save(seat);
+            }
+        }
+        return selectedSeats;
+    }
+
+    @Transactional
     public Ticket bookTicket(String username, TicketRequest ticketRequest) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("Error: User not found."));
@@ -46,13 +116,25 @@ public class TicketService {
              throw new RuntimeException("Error: One or more selected seats do not exist.");
         }
 
-        // Check if all selected seats are available
+        LocalDateTime now = LocalDateTime.now();
+
+        // Check if all selected seats are properly locked by the current user
         for (ShowSeat seat : selectedSeats) {
-            if (!seat.getStatus().equals(ShowSeat.SeatStatus.AVAILABLE)) {
-                throw new RuntimeException("Error: Seat " + seat.getSeat().getSeatNumber() + " is already booked.");
-            }
             if (!seat.getShow().getId().equals(show.getId())) {
                  throw new RuntimeException("Error: Seat " + seat.getSeat().getSeatNumber() + " does not belong to this show.");
+            }
+
+            if (seat.getStatus().equals(ShowSeat.SeatStatus.BOOKED)) {
+                throw new RuntimeException("Error: Seat " + seat.getSeat().getSeatNumber() + " is already booked.");
+            }
+            
+            if (seat.getStatus().equals(ShowSeat.SeatStatus.AVAILABLE) || 
+               (seat.getStatus().equals(ShowSeat.SeatStatus.LOCKED) && seat.getLockedUntil().isBefore(now))) {
+                 throw new RuntimeException("Error: Seat " + seat.getSeat().getSeatNumber() + " is not locked or the lock has expired. Please lock the seat first.");
+            }
+
+            if (seat.getStatus().equals(ShowSeat.SeatStatus.LOCKED) && !seat.getLockedBy().getId().equals(user.getId())) {
+                 throw new RuntimeException("Error: Seat " + seat.getSeat().getSeatNumber() + " is locked by another user.");
             }
         }
 
@@ -69,10 +151,12 @@ public class TicketService {
         
         Ticket savedTicket = ticketRepository.save(ticket);
 
-        // Mark seats as booked and associate with the ticket
+        // Mark seats as booked and associate with the ticket, clear lock info
         for (ShowSeat seat : selectedSeats) {
             seat.setStatus(ShowSeat.SeatStatus.BOOKED);
             seat.setTicket(savedTicket);
+            seat.setLockedBy(null);
+            seat.setLockedUntil(null);
             showSeatRepository.save(seat);
         }
 

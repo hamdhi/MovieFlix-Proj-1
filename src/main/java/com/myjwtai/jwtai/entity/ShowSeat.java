@@ -1,6 +1,7 @@
 package com.myjwtai.jwtai.entity;
 
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "show_seats")
@@ -26,10 +27,17 @@ public class ShowSeat {
     @JoinColumn(name = "ticket_id")
     private Ticket ticket; // Nullable, only set when status is BOOKED
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "locked_by_user_id")
+    private User lockedBy; // User who currently holds the lock
+
+    @Column(name = "locked_until")
+    private LocalDateTime lockedUntil; // Timestamp when the lock expires
+
     public enum SeatStatus {
         AVAILABLE,
-        BOOKED,
-        LOCKED // Temporarily held
+        LOCKED, // Temporarily held by a user
+        BOOKED
     }
 
     public ShowSeat() {}
@@ -72,5 +80,21 @@ public class ShowSeat {
 
     public void setTicket(Ticket ticket) {
         this.ticket = ticket;
+    }
+
+    public User getLockedBy() {
+        return lockedBy;
+    }
+
+    public void setLockedBy(User lockedBy) {
+        this.lockedBy = lockedBy;
+    }
+
+    public LocalDateTime getLockedUntil() {
+        return lockedUntil;
+    }
+
+    public void setLockedUntil(LocalDateTime lockedUntil) {
+        this.lockedUntil = lockedUntil;
     }
 }

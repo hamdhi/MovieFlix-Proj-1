@@ -1,7 +1,10 @@
 package com.myjwtai.jwtai.controller;
 
+import com.myjwtai.jwtai.entity.ShowSeat;
 import com.myjwtai.jwtai.entity.Ticket;
+import com.myjwtai.jwtai.payload.request.LockSeatsRequest;
 import com.myjwtai.jwtai.payload.request.TicketRequest;
+import com.myjwtai.jwtai.payload.request.UnlockSeatsRequest;
 import com.myjwtai.jwtai.service.TicketService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -19,6 +22,34 @@ public class TicketController {
 
     @Autowired
     private TicketService ticketService;
+
+    @PostMapping("/lock-seats")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<?> lockSeats(@RequestBody LockSeatsRequest lockRequest) {
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String username = authentication.getName();
+
+            List<ShowSeat> lockedSeats = ticketService.lockSeats(username, lockRequest);
+            return ResponseEntity.ok(lockedSeats);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/unlock-seats")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<?> unlockSeats(@RequestBody UnlockSeatsRequest unlockRequest) {
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String username = authentication.getName();
+
+            List<ShowSeat> unlockedSeats = ticketService.unlockSeats(username, unlockRequest);
+            return ResponseEntity.ok(unlockedSeats);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 
     // Users can book tickets
     @PostMapping("/book")
