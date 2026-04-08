@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class TicketService {
@@ -33,6 +34,9 @@ public class TicketService {
     
     @Autowired
     private ShowSeatRepository showSeatRepository;
+    
+    @Autowired
+    private EmailService emailService;
 
     @Transactional
     public List<ShowSeat> lockSeats(String username, LockSeatsRequest lockRequest) {
@@ -159,6 +163,23 @@ public class TicketService {
             seat.setLockedUntil(null);
             showSeatRepository.save(seat);
         }
+        
+        // Send Email asynchronously
+        String seatNumbers = selectedSeats.stream()
+                .map(seat -> seat.getSeat().getSeatNumber())
+                .collect(Collectors.joining(", "));
+                
+        String subject = "Booking Confirmation - " + show.getMovie().getTitle();
+        String text = String.format(
+            "Hello %s,\n\nYour booking is confirmed!\n\nMovie: %s\nScreen: %s\nTime: %s\nSeats: %s\nTotal Amount: $%.2f\n\nEnjoy the movie!",
+            user.getUsername(),
+            show.getMovie().getTitle(),
+            show.getScreen().getName(),
+            show.getShowTime().toString(),
+            seatNumbers,
+            totalAmount
+        );
+        emailService.sendEmail(user.getEmail(), subject, text);
 
         return savedTicket;
     }
@@ -197,6 +218,18 @@ public class TicketService {
 
         // Update ticket status
         ticket.setStatus(Ticket.TicketStatus.CANCELLED);
-        return ticketRepository.save(ticket);
+        Ticket cancelledTicket = ticketRepository.save(ticket);
+        
+        // Send Email asynchronously
+        String subject = "Booking Cancelled - " + ticket.getShow().getMovie().getTitle();
+        String text = String.format(
+            "Hello %s,\n\nYour booking for %s has been successfully cancelled.\n\nRefund Amount: $%.2f\n\nWe hope to see you again soon!",
+            user.getUsername(),
+            ticket.getShow().getMovie().getTitle(),
+            ticket.getTotalAmount()
+        );
+        emailService.sendEmail(user.getEmail(), subject, text);
+        
+        return cancelledTicket;
     }
 }
