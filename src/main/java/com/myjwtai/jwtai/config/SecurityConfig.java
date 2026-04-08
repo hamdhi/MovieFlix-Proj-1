@@ -64,7 +64,8 @@ public class SecurityConfig {
                 auth.requestMatchers("/api/auth/**").permitAll()
                     .requestMatchers("/api/test/**").permitAll()
                     .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
-                    .requestMatchers("/api/v1/addMovie").hasRole("ADMIN")
+                    .requestMatchers("/api/v1/movies").hasAnyRole("USER", "ADMIN") // Allow USER and ADMIN to search movies
+                    .requestMatchers("/api/v1/movies/add").hasRole("ADMIN") // Only ADMIN can add movies
                     .anyRequest().authenticated()
             );
         
