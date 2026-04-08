@@ -1,9 +1,15 @@
 package com.myjwtai.jwtai.payload.request;
 
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+
 import java.util.List;
 
 public class LockSeatsRequest {
+    @NotNull(message = "Show ID is required")
     private Long showId;
+    
+    @NotEmpty(message = "You must select at least one seat to lock")
     private List<Long> showSeatIds;
 
     public Long getShowId() {

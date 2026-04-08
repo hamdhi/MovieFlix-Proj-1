@@ -5,6 +5,7 @@ import com.myjwtai.jwtai.entity.ShowSeat;
 import com.myjwtai.jwtai.payload.request.ShowRequest;
 import com.myjwtai.jwtai.repository.ShowSeatRepository;
 import com.myjwtai.jwtai.service.ShowService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,7 +28,7 @@ public class ShowController {
     // Only Admins can add shows for a movie
     @PostMapping("/add")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Show> addShow(@RequestBody ShowRequest showRequest) {
+    public ResponseEntity<Show> addShow(@Valid @RequestBody ShowRequest showRequest) {
         Show show = showService.addShow(showRequest);
         return new ResponseEntity<>(show, HttpStatus.CREATED);
     }
@@ -48,7 +49,7 @@ public class ShowController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Show> updateShow(@PathVariable Long id, @RequestBody ShowRequest showRequest) {
+    public ResponseEntity<Show> updateShow(@PathVariable Long id, @Valid @RequestBody ShowRequest showRequest) {
         Show updatedShow = showService.updateShow(id, showRequest);
         return ResponseEntity.ok(updatedShow);
     }

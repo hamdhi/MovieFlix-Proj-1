@@ -2,6 +2,7 @@ package com.myjwtai.jwtai.controller;
 
 import com.myjwtai.jwtai.entity.Movie;
 import com.myjwtai.jwtai.service.MovieService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -16,7 +17,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/v1/movies") // Changed base path to /api/v1/movies
+@RequestMapping("/api/v1/movies")
 public class MovieController {
 
     private final MovieService movieService;
@@ -26,7 +27,7 @@ public class MovieController {
         this.movieService = movieService;
     }
 
-    @PostMapping("/add") // Changed endpoint to /add
+    @PostMapping("/add")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Movie> addMovie(@RequestBody Movie movie) {
         Movie savedMovie = movieService.addMovie(movie);

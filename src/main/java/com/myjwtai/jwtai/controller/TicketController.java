@@ -6,6 +6,7 @@ import com.myjwtai.jwtai.payload.request.LockSeatsRequest;
 import com.myjwtai.jwtai.payload.request.TicketRequest;
 import com.myjwtai.jwtai.payload.request.UnlockSeatsRequest;
 import com.myjwtai.jwtai.service.TicketService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,7 +26,7 @@ public class TicketController {
 
     @PostMapping("/lock-seats")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<?> lockSeats(@RequestBody LockSeatsRequest lockRequest) {
+    public ResponseEntity<?> lockSeats(@Valid @RequestBody LockSeatsRequest lockRequest) {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String username = authentication.getName();
@@ -39,7 +40,7 @@ public class TicketController {
 
     @PostMapping("/unlock-seats")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<?> unlockSeats(@RequestBody UnlockSeatsRequest unlockRequest) {
+    public ResponseEntity<?> unlockSeats(@Valid @RequestBody UnlockSeatsRequest unlockRequest) {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String username = authentication.getName();
@@ -54,7 +55,7 @@ public class TicketController {
     // Users can book tickets
     @PostMapping("/book")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<?> bookTicket(@RequestBody TicketRequest ticketRequest) {
+    public ResponseEntity<?> bookTicket(@Valid @RequestBody TicketRequest ticketRequest) {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String username = authentication.getName();

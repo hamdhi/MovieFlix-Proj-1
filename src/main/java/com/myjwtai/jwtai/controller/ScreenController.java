@@ -2,6 +2,7 @@ package com.myjwtai.jwtai.controller;
 
 import com.myjwtai.jwtai.entity.Screen;
 import com.myjwtai.jwtai.service.ScreenService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,7 +11,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/screens")
@@ -21,7 +21,7 @@ public class ScreenController {
 
     @PostMapping("/add")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Screen> addScreen(@RequestBody Screen screen) {
+    public ResponseEntity<Screen> addScreen(@Valid @RequestBody Screen screen) {
         Screen savedScreen = screenService.addScreen(screen);
         return new ResponseEntity<>(savedScreen, HttpStatus.CREATED);
     }
@@ -42,7 +42,7 @@ public class ScreenController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Screen> updateScreen(@PathVariable Long id, @RequestBody Screen screenDetails) {
+    public ResponseEntity<Screen> updateScreen(@PathVariable Long id, @Valid @RequestBody Screen screenDetails) {
         Screen updatedScreen = screenService.updateScreen(id, screenDetails);
         return ResponseEntity.ok(updatedScreen);
     }
